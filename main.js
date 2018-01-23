@@ -6,91 +6,102 @@
  * Do NOT claim my source code as your own.
  */
 
-const EDO = {
-	Block: [],
-	Yield: null,
-	Before: {x: 0,y: 0, z: 0},
-	DIGGING: false,
-	DICTIONARY: [14, 15, 16, 21, 56, 73, 74, 89, 153],
-	setArea: function(Coords, area){
-		this.Block.push(Coords.x);
-		this.Block.push(Coords.y);
-		this.Block.push(Coords.z);
-		this.Block.push(area);
-	} 
+const ID = {
+	Glowstone: 89,
+	Goldblock: 41,
+	IronPickaxe: 257,
+	NetherReactorCore: 247
 };
 
-Item.registerUseFunctionForID(257, function(Coords, Item, Block){
-	if (World.getBlockID(Coords.x, Coords.y + 1, Coords.z) === 89 && // グロウストーン
-			Block.id === 41 && Block.data === 0) { // 金ブロック
-		if (EDO.DIGGING) {
+const Edo = {
+	gen: null,
+	range: 0,
+	DIGGING: false,
+	DICTIONARY: [14, 15, 16, 21, 56, 73, 74, 89, 153],
+};
+
+Edo.coords = {
+	x: 0,
+	y: -1,
+	z: 0
+};
+
+Edo.start = function(Coords,area) {
+	Edo.DIGGING = true;
+	Edo.coords.x = Coords.x;
+	Edo.coords.y = Coords.y;
+	Edo.coords.z = Coords.z;
+	Edo.gen = Edo.digGenerator(Coords,area);
+	Player.setCarriedItem(0, 0, 0);
+	World.destroyBlock(Coords.x, Coords.y+ 1, Coords.z, false);
+	World.setBlock(Coords.x, Coords.y, Coords.z, ID.NetherReactorCore, 0);
+	
+	
+};
+
+Edo.finish = function() {
+	Edo.DIGGING = false;
+	World.destroyBlock(Edo.coords.x, Edo.coords.y, Edo.coords.z, false);
+};
+
+Item.registerUseFunctionForID(ID.IronPickaxe, function(Coords, Item, Block){
+	if (Block.id === ID.Goldblock && World.getBlockID(Coords.x, Coords.y + 1, Coords.z) === ID.Glowstone) {
+		if (Edo.DIGGING) {
 			Game.message("他の場所で採掘が行われています。");
 		} else {
-			
-			Player.setCarriedItem(0, 0, 0);
-			EDO.setArea(Coords,4);
-			EDO.DIGGING = true;
+			Edo.start(Coords, 4);
 			Game.message("採掘を開始します。");
 			
 		}
 	}
 }); 
 
-Callback.addCallback("tick",function() {
-	if (EDO.Yield != null) {
+Callback.addCallback("tick", function() {
+	if (Edo.gen != null) {
 		try {
-			EDO.Yield.next();
+			Edo.gen.next();
 		} catch (Error) {
-			EDO.Yield = null;
+			Edo.gen = null;
+			Edo.finish();
 			Game.message("採掘が終了しました。");
 		}
-	} else if (EDO.Block.length !== 0) {
-		EDO.Yield = blockYield(EDO.Block[0],EDO.Block[1],EDO.Block[2],EDO.Block[3]);
-		EDO.Block.length = 0;
 	}
 });
 
 Callback.addCallback("DestroyBlock", function(Coords, Block, Player){
-	const x = Coords.x, y = Coords.y, z = Coords.z;
-	if (x == EDO.Before.x && (y == EDO.Before.y || y == EDO.Before.y + 1) && z == EDO.Before.z) {
-		EDO.DIGGING = false;
+	if (Edo.DIGGING
+		&& Coords.x == Edo.coords.x
+		&& Coords.y == Edo.coords.y
+		&& Coords.z == Edo.coords.z
+	) {
+		Edo.finish();
 	}
 	
 });
 
-
-
-
-function dropMoveUp(x, y, z, xx, yy, zz, area, id) {
-	World.setBlock(x + xx - area, yy, z + zz - area, 0, 0);
-	Entity.setVelocity(World.drop (x + 0.5, y + 1, z + 0.5, id, 1, 0) , Math.random(), 0.3, Math.random());
-}
-
-
-
-function setDesBlock(x,y,z){
-	EDO.Before.x = x;
-	EDO.Before.y = y;
-	EDO.Before.z = z;
-	World.destroyBlock(x, y, z, false);
-	World.destroyBlock(x, y + 1, z, false);
-	World.setBlock(x, y, z, 247, 0);
-}
-
-function blockYield(x,y,z,area){
-	setDesBlock(x,y,z);
-	loop:for(let zz=area*2;zz--;)for(let xx=2*area;xx--;){
-		for(let yy=y;yy--;){
-			let id=World.getBlockID(x+xx-area,yy,z+zz-area);
-			if(!EDO.DIGGING)break loop;
-			if(-1!==EDO.DICTIONARY.indexOf(id))
-				dropMoveUp(x,y,z,xx,yy,zz,area,id);
+Edo.digGenerator = function(Coords,area) {
+	loop:
+	for (let x = Coords.x - area, xl = Coords.x + area; x <= xl; x++) {
+		for (let z = Coords.z - area, zl = Coords.z + area; z <= zl; z++) {
+			for (let y = 0 , yl = Coords.y ; y <= yl; y++) {
+				if (!Edo.DIGGING) break loop;
+				Edo.setEmptyBlockAndDrop(Coords, x, y, z);
+			}
+			yield;
 		}
-		yield;
-		
-		
 	}
-	World.destroyBlock(x,y,z,false);
-	EDO.DIGGING = false;
-	EDO.Before.x=EDO.Before.y=EDO.Before.xz=0;
 }
+
+Edo.setEmptyBlockAndDrop = function(Coords, x, y, z) {
+	const id = World.getBlockID(x, y, z);
+	if (Edo.DICTIONARY.indexOf(id) !== -1) {
+		World.setBlock(x, y, z, 0, 0);
+		const data = World.getBlockData(x, y, z);
+		const entity = World.drop(Coords.x + 0.5, Coords.y + 1, Coords.z + 0.5,id, 1, data);
+		Entity.setVelocity(entity, Math.random() < 0.5 ? Math.random() * -0.5 : Math.random() * 0.5, 0.6, Math.random() < 0.5 ? Math.random() * -0.5 : Math.random() * 0.5);
+	}
+};
+
+
+
+
