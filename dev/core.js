@@ -9,7 +9,7 @@
 const Edo = {
 	gen: null,
 	range: 0,
-	Edo.coords: {x: 0, y: 0,z: 0},
+	coords: {x: 0, y: 0,z: 0},
 	DIGGING: false,
 	DICTIONARY: [14, 15, 16, 21, 56, 73, 74, 89, 153],
 };
