@@ -2,8 +2,21 @@
 BUILD INFO:
   dir: dev
   target: main.js
-  files: 1
+  files: 4
 */
+
+
+
+// file: id.js
+
+const ID = {
+	Glowstone: 89,
+	Goldblock: 41,
+	GoldPickaxe: 285,
+	DiamondPickaxe: 278,
+	NetherReactorCore: 247
+};
+
 
 
 
@@ -17,24 +30,12 @@ BUILD INFO:
  * Do NOT claim my source code as your own.
  */
 
-const ID = {
-	Glowstone: 89,
-	Goldblock: 41,
-	IronPickaxe: 257,
-	NetherReactorCore: 247
-};
-
 const Edo = {
 	gen: null,
 	range: 0,
+	coords: {x: 0, y: 0,z: 0},
 	DIGGING: false,
 	DICTIONARY: [14, 15, 16, 21, 56, 73, 74, 89, 153],
-};
-
-Edo.coords = {
-	x: 0,
-	y: -1,
-	z: 0
 };
 
 Edo.start = function(Coords,area) {
@@ -46,49 +47,12 @@ Edo.start = function(Coords,area) {
 	Player.setCarriedItem(0, 0, 0);
 	World.destroyBlock(Coords.x, Coords.y+ 1, Coords.z, false);
 	World.setBlock(Coords.x, Coords.y, Coords.z, ID.NetherReactorCore, 0);
-	
-	
 };
 
 Edo.finish = function() {
 	Edo.DIGGING = false;
 	World.destroyBlock(Edo.coords.x, Edo.coords.y, Edo.coords.z, false);
 };
-
-Item.registerUseFunctionForID(ID.IronPickaxe, function(Coords, Item, Block){
-	if (Block.id === ID.Goldblock && World.getBlockID(Coords.x, Coords.y + 1, Coords.z) === ID.Glowstone) {
-		if (Edo.DIGGING) {
-			Game.message("他の場所で採掘が行われています。");
-		} else {
-			Edo.start(Coords, 4);
-			Game.message("採掘を開始します。");
-			
-		}
-	}
-}); 
-
-Callback.addCallback("tick", function() {
-	if (Edo.gen != null) {
-		try {
-			Edo.gen.next();
-		} catch (Error) {
-			Edo.gen = null;
-			Edo.finish();
-			Game.message("採掘が終了しました。");
-		}
-	}
-});
-
-Callback.addCallback("DestroyBlock", function(Coords, Block, Player){
-	if (Edo.DIGGING
-		&& Coords.x == Edo.coords.x
-		&& Coords.y == Edo.coords.y
-		&& Coords.z == Edo.coords.z
-	) {
-		Edo.finish();
-	}
-	
-});
 
 Edo.digGenerator = function(Coords,area) {
 	loop:
@@ -116,6 +80,67 @@ Edo.setEmptyBlockAndDrop = function(Coords, x, y, z) {
 
 
 
+
+
+
+
+
+
+
+// file: callback.js
+
+Callback.addCallback("tick", function() {
+	if (Edo.gen != null) {
+		try {
+			Edo.gen.next();
+		} catch (Error) {
+			Edo.gen = null;
+			Edo.finish();
+			Game.message("採掘が終了しました。");
+		}
+	}
+});
+
+Callback.addCallback("DestroyBlock", function(Coords, Block, Player){
+	if (Edo.DIGGING
+		&& Coords.x == Edo.coords.x
+		&& Coords.y == Edo.coords.y
+		&& Coords.z == Edo.coords.z
+	) {
+		Edo.finish();
+	}
+	
+});
+
+
+
+
+
+// file: item.js
+
+Item.registerUseFunctionForID(ID.GoldPickaxe, function(Coords, Item, Block){
+	if (Block.id === ID.Goldblock && World.getBlockID(Coords.x, Coords.y + 1, Coords.z) === ID.Glowstone) {
+		if (Edo.DIGGING) {
+			Game.message("他の場所で採掘が行われています。");
+		} else {
+			Edo.start(Coords, 4);
+			Game.message("採掘を開始します。");
+			
+		}
+	}
+});
+
+Item.registerUseFunctionForID(ID.DiamondPickaxe, function(Coords, Item, Block){
+	if (Block.id === ID.Goldblock && World.getBlockID(Coords.x, Coords.y + 1, Coords.z) === ID.Glowstone) {
+		if (Edo.DIGGING) {
+			Game.message("他の場所で採掘が行われています。");
+		} else {
+			Edo.start(Coords, 8);
+			Game.message("採掘を開始します。");
+			
+		}
+	}
+});
 
 
 
