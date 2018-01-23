@@ -1,4 +1,4 @@
-Callback.addCallback("tick", function() {
+Callback.addCallback("tick", function () {
 	if (Edo.gen != null) {
 		try {
 			Edo.gen.next();
@@ -10,14 +10,13 @@ Callback.addCallback("tick", function() {
 	}
 });
 
-Callback.addCallback("DestroyBlock", function(Coords, Block, Player){
-	if (Edo.DIGGING
-		&& Coords.x == Edo.coords.x
-		&& Coords.y == Edo.coords.y
-		&& Coords.z == Edo.coords.z
+Callback.addCallback("DestroyBlock", function (Coords, Block, Player) {
+	if (Edo.DIGGING &&
+		Coords.x == Edo.coords.x &&
+		Coords.y == Edo.coords.y &&
+		Coords.z == Edo.coords.z
 	) {
 		Edo.finish();
 	}
-	
-});
 
+});
