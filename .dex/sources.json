@@ -1,3 +1,17 @@
 {
-  
+  "main.js":{
+    "links":[
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "class_name":"main.js"
+  },
+  "launcher.js":{
+    "links":[
+      "5"
+    ],
+    "class_name":"launcher.js"
+  }
 }
