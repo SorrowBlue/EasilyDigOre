@@ -1,0 +1,17 @@
+{
+	"eslint": "recommended",
+	"env": {
+		"es6": true
+	},
+	"rules": {
+	},
+	"globals": {
+		"World": flase,
+        "Item": false,
+        "Game": false,
+        "Player": false,
+        "Callback": false,
+        "Entity": false,
+        "yield": false
+	}
+}
