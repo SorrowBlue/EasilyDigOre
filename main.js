@@ -1,3 +1,14 @@
+/*
+BUILD INFO:
+  dir: dev
+  target: main.js
+  files: 1
+*/
+
+
+
+// file: core.js
+
 /** EasilyDigOre for InnerCore 1.0
  *
  * (c) 2016 SorrowBlue
@@ -98,9 +109,13 @@ Edo.setEmptyBlockAndDrop = function(Coords, x, y, z) {
 		World.setBlock(x, y, z, 0, 0);
 		const data = World.getBlockData(x, y, z);
 		const entity = World.drop(Coords.x + 0.5, Coords.y + 1, Coords.z + 0.5,id, 1, data);
-		Entity.setVelocity(entity, Math.random() < 0.5 ? Math.random() * -0.5 : Math.random() * 0.5, 0.6, Math.random() < 0.5 ? Math.random() * -0.5 : Math.random() * 0.5);
+		Entity.setVelocity(entity, Math.random() < 0.5 ? Math.random() * -0.3 : Math.random() * 0.3, 0.6, Math.random() < 0.3 ? Math.random() * -0.3 : Math.random() * 0.3);
 	}
 };
+
+
+
+
 
 
 
