@@ -80,6 +80,27 @@ Edo.setEmptyBlockAndDrop = function (Coords, x, y, z) {
 	}
 };
 
+let Pos = {
+  x : 1.00052,
+  y : 6.54346,
+  z : 3.15467
+}
+Pos = DeleteDecimal(Pos);
+
+function DeleteDecimal(Number){
+	if(typeof Number == "number"){
+		return Number | 0;
+	} else if(typeof Number == "object"){
+		this.Object = {};
+		for(Key in Number){
+			this.Object[Key] = Number[Key] | 0;
+		}
+		return this.Object;
+	}
+}
+
+
+
 
 
 
